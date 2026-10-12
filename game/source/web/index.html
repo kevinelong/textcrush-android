@@ -1,0 +1,163 @@
+<script src="../game/classes/model/Util.js"></script>
+<script src="../game/classes/model/Symbol.js"></script>
+<script src="../game/classes/model/Neighbor.js"></script>
+<script src="../game/classes/model/Position.js"></script>
+<script src="../game/classes/model/Board.js"></script>
+<script src="../game/classes/model/Game.js"></script>
+<script src="../game/classes/model/Sprite.js"></script>
+<script src="../game/classes/view/Tile.js"></script>
+<script src="../game/classes/view/Display.js"></script>
+<script>
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+        let AudioContext = window.AudioContext // Default
+            || window.webkitAudioContext // Safari and old versions of Chrome
+            || false;
+        let context = new AudioContext();
+
+        let c = document.createElement("canvas");
+
+        c.setAttribute("width", window.innerWidth.toString());
+        c.setAttribute("height", window.innerHeight.toString());
+
+        document.body.style.margin = "0";
+        document.body.appendChild(c);
+
+        let g = null;
+        let d = null;
+
+        function initialize() {
+
+            c.removeEventListener('click', initialize);
+
+            let previous = d;
+
+            g = new Game(8, 8);
+            d = new Display(c, g);
+
+            if (previous !== null) {
+                previous.stop();
+            }
+
+            function gameOver() {
+                let high_score_key = "high_score";
+
+                c.removeEventListener('click', onClick);
+                let message = "Game Over";
+
+                let high_score = localStorage.getItem(high_score_key);
+
+                if (g.score > high_score) {
+                    localStorage.setItem(high_score_key, g.score);
+                    message += "\nNew High Score!!!\n" +
+                        Display.addCommas(g.score.toString());
+                } else {
+                    message += "\nPrevious High Score:\n" +
+                        Display.addCommas(high_score);
+                }
+
+
+                d.showGameOver(message);
+                d.burst();
+
+                g = null;
+                d = null;
+
+                c.addEventListener('click', initialize);
+            }
+
+            function play(context, frequency, duration) {
+
+                let o = context.createOscillator();
+                let g = context.createGain();
+
+                o.connect(g);
+                g.connect(context.destination);
+
+                g.gain.exponentialRampToValueAtTime(
+                    0.00001, context.currentTime + duration
+                );
+
+                o.frequency.value = frequency;
+                o.start();
+
+            }
+
+            function onClick(e) {
+
+                if (d.busy) {
+                    return;
+                }
+
+                let delay = 150;
+
+                let values = d.onClick(e.x, e.y);
+
+                let neighbors = values["neighbors"];
+
+                if (AudioContext) {
+
+                    let count = Object.keys(neighbors).length;
+                    let noteLength = (500 / 8) / 1000;
+
+                    let notes = [];
+
+                    for (let i = 0; i < count; i++) {
+                        notes.push(440 + (60 * i));
+                    }
+
+                    for (let i = 0; i < notes.length; i++) {
+                        setTimeout(function () {
+                            play(context, notes[i], noteLength);
+                        }, noteLength * i * 1000);
+                    }
+
+
+                }
+
+                setTimeout(function () {
+
+                    let plan = g.fallPlan();
+
+                    g.moveDown();
+
+                    d.animateFall(plan, function () {
+
+                        if (g.movesUsed >= g.movesAvailable) {
+                            gameOver();
+                        }
+
+                    });
+
+                }, delay);
+
+            }
+
+            d.animateReveal(function () {
+                c.addEventListener('click', onClick);
+            });
+        }
+
+        initialize();
+
+        (function () {
+            window.addEventListener("resize", resizeThrottler, false);
+            let resizeTimeout = null;
+
+            function resizeThrottler() {
+                if (!resizeTimeout) {
+                    resizeTimeout = setTimeout(function () {
+                        resizeTimeout = null;
+                        if (d !== null) {
+                            d.draw();
+                        }
+                    }, 66);
+                }
+            }
+        }());
+    })
+    ;
+
+
+</script>

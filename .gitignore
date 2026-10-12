@@ -1,0 +1,11 @@
+dl/
+toolchain/
+build/
+out/
+__pycache__/
+*.pyc
+
+# Signing material never goes in the repository.
+tools/debug.keystore
+tools/release.keystore
+tools/release-credentials.txt

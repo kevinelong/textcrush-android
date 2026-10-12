@@ -1,0 +1,30 @@
+
+<script src="../game/classes/model/Util.js"></script>
+<script src="../game/classes/model/Symbol.js"></script>
+<script src="../game/classes/model/Neighbor.js"></script>
+<script src="../game/classes/model/Position.js"></script>
+<script src="../game/classes/model/Board.js"></script>
+<script src="../game/classes/model/Game.js"></script>
+<script src="../game/classes/model/Sprite.js"></script>
+<script src="../game/classes/view/Tile.js"></script>
+<script src="../game/classes/view/DisplayConsole.js"></script>
+
+<script>
+    var d = new DisplayConsole();
+    var g = new Game(5, 3);
+    var X = new Symbol(0, 'X');
+    var Y = new Symbol(1, 'Y');
+    g.board.positions = [
+        X, X, X, X, X,
+        X, Y, X, Y, X,
+        Y, Y, Y, Y, Y,
+        Y, Y, Y, Y, Y,
+        X, Y, X, Y, X,
+        X, Y, X, Y, X
+    ];
+    d.draw(g.board);
+    g.onRemove(5, 4, {});
+    d.draw(g.board);
+    g.moveDown();
+    d.draw(g.board);
+</script>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The game's own background, so there is no flash of a foreign colour before the page paints. -->
+    <color name="bg">#FF221100</color>
+
+    <!-- Launcher icon: the game's board colour behind four letter tiles. -->
+    <color name="icon_bg">#FF221100</color>
+    <color name="icon_tile_a">#FFC74FA0</color>
+    <color name="icon_tile_b">#FF39B36A</color>
+    <color name="icon_tile_c">#FF3FA9C7</color>
+    <color name="icon_tile_d">#FFE08A3C</color>
+</resources>
