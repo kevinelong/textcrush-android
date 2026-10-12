@@ -18,8 +18,8 @@ exponentially with the size of the run you clear, so one big group beats five sm
 
 | Artifact | Size | SHA-256 | Purpose |
 | --- | --- | --- | --- |
-| `textcrush-release.apk` | 206,173 bytes | `8b78025c0cff945390ea19a5a2caf467730cbd4f3d2e2c230d17cc0adc83efc7` | release-signed, for the phone — this is the published file |
-| `out/textcrush.apk` | 202,077 bytes | `f6dd902ad43debfebd2f66e4ac9f30e56415451449731582a161dabdbe7f8d64` | debug-signed, for the dev loop (`sh build.sh`) |
+| `textcrush-release.apk` | 210,269 bytes | `a8c47cc37e6257284f4806ed41a1abc99f47846b0551ffe6307df8ddd3583587` | release-signed, for the phone — this is the published file |
+| `out/textcrush.apk` | 206,173 bytes | `152d9ec1cbf97bc9520abe17999c5546bc4e019e5d2257f1b07115e00ea02522` | debug-signed, for the dev loop (`sh build.sh`) |
 
 Requires Android 5.0 (API 21) or newer. Portrait, full screen, screen stays awake while you play.
 
@@ -119,6 +119,14 @@ looked at:
   honoured too (no deal-in, no fall, no pop, no
   float when reduced motion is on: 6,412 painted samples at 80 ms normally against 36,798 with it
   reduced).
+- **The rules are one tap away, and shown once**: a `?` in the header opens a rules screen; a fresh
+  install shows it automatically, because nothing on screen said what to do. The same words are a real
+  hidden paragraph with a "How to play" button, so a screen reader can read them.
+- **The turns are hard to miss**: the header's counter turns amber at 5 or fewer and red at 2 or fewer,
+  swells when a turn is spent, and a bar under the header drains with them - measured 1080 / 270 / 108
+  device pixels wide at 20 / 5 / 2 turns.
+- **The end card arrives and leaves**: the dim ramps in, the lines rise in turn, the prompt pulses, and
+  the card fades out before the next board is dealt. The score counts up rather than jumping.
 - **A game in progress survives a restart**: the board, score and turns are kept on the device, so
   putting the phone down (or the system killing the app) and coming back resumes exactly where you
   were. Measured on the emulator: two moves, `am force-stop`, relaunch - the same score, the same
@@ -156,7 +164,7 @@ looked at:
 ## Upstream and license
 
 The game itself lives in [kevinelong/textcrush](https://github.com/kevinelong/textcrush); `game/` here
-is that source at commit `a073380`, vendored so the APK build has no external checkout. Everything
+is that source at commit `df17c8d`, vendored so the APK build has no external checkout. Everything
 under `game/` is upstream's; the Android wrapper is this repository.
 
 Licensed under the **Functional Source License, Version 1.1, MIT Future License** (`FSL-1.1-MIT`) —

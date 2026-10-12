@@ -57,6 +57,11 @@ echo
 echo "== cold start and deal-in =="
 $ADBS shell am start -W -n $APP/.MainActivity | grep -E "LaunchState|Status"
 sleep 4
+
+# A fresh install shows the rules once, and the tap that closes them is not a move: dismiss them
+# before taking the reference shot, or the first board tap below would only dismiss them again.
+$ADBS shell input tap "$TAP_X" "$TAP_Y"
+sleep 2
 shoot 01-board
 
 echo

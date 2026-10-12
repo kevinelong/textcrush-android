@@ -1,6 +1,7 @@
 package com.kevin.textcrush;
 
 import android.app.Activity;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.graphics.Typeface;
@@ -42,11 +43,20 @@ public class MainActivity extends Activity {
 
     private WebView web;
 
-    /** the native header: the game's score line as real text, plus the sound button */
+    /** the native header: the game's score line as real text, plus the controls */
     private TextView scoreView;
     private TextView turnsView;
     private TextView bestView;
     private TextView soundView;
+    private TextView helpView;
+
+    /** the turn bar: a track with a fill whose scaleX is the turns remaining */
+    private View turnTrack;
+    private View turnFill;
+
+    private int lastTurns = -1;
+    private int shownScore = 0;
+    private int totalTurns = 20;
 
     /** mirrored from the page, so the sound button knows which way to toggle */
     private boolean muted = false;
@@ -144,9 +154,12 @@ public class MainActivity extends Activity {
     private View buildHeader() {
 
         LinearLayout header = new LinearLayout(this);
-        header.setOrientation(LinearLayout.HORIZONTAL);
-        header.setGravity(Gravity.CENTER_VERTICAL);
-        header.setPadding(dp(22), dp(18), dp(14), dp(8));
+        header.setOrientation(LinearLayout.VERTICAL);
+
+        LinearLayout row = new LinearLayout(this);
+        row.setOrientation(LinearLayout.HORIZONTAL);
+        row.setGravity(Gravity.CENTER_VERTICAL);
+        row.setPadding(dp(22), dp(16), dp(8), dp(8));
 
         scoreView = label("0", 40, 0xFFFFEECC, Typeface.BOLD);
         scoreView.setContentDescription("Score 0");
@@ -160,8 +173,20 @@ public class MainActivity extends Activity {
         counters.addView(turnsView);
         counters.addView(bestView);
 
+        helpView = label("?", 20, 0xFFFFEECC, Typeface.BOLD);
+        helpView.setContentDescription("How to play");
+        helpView.setPadding(dp(16), dp(14), dp(20), dp(14));
+        helpView.setClickable(true);
+        helpView.setFocusable(true);
+        helpView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                web.evaluateJavascript("window.setTextCrushHelp(true)", null);
+            }
+        });
+
         soundView = label("Sound on", 15, 0xFFFFEECC, Typeface.NORMAL);
-        soundView.setPadding(dp(16), dp(16), dp(16), dp(16));
+        soundView.setPadding(dp(16), dp(14), dp(16), dp(14));
         soundView.setClickable(true);
         soundView.setFocusable(true);
         soundView.setOnClickListener(new View.OnClickListener() {
@@ -178,12 +203,46 @@ public class MainActivity extends Activity {
         LinearLayout.LayoutParams grow =
                 new LinearLayout.LayoutParams(0, 1, 1f);
 
-        header.addView(scoreView);
-        header.addView(counters);
-        header.addView(new View(this), grow);
-        header.addView(soundView);
+        row.addView(scoreView);
+        row.addView(counters);
+        row.addView(new View(this), grow);
+        row.addView(helpView);
+        row.addView(soundView);
+
+        // The turn bar: a strip under the header that drains as the turns are spent. The number alone
+        // is easy to miss while you are watching the bubbles.
+        turnTrack = new View(this);
+        turnTrack.setBackgroundColor(0xFF33200D);
+
+        turnFill = new View(this);
+        turnFill.setBackgroundColor(0xFFFFEECC);
+        turnFill.setPivotX(0f);
+
+        FrameLayout bar = new FrameLayout(this);
+        bar.addView(turnTrack, new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT, dp(3)));
+        bar.addView(turnFill, new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT, dp(3)));
+
+        header.addView(row);
+        header.addView(bar, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, dp(3)));
 
         return header;
+    }
+
+    /** the turn counter's ink, escalating as the turns run out - the same ramp the web build uses */
+    private static int turnsInk(int left) {
+
+        if (left <= 2) {
+            return 0xFFFF7A5C;
+        }
+
+        if (left <= 5) {
+            return 0xFFF0B84A;
+        }
+
+        return 0xFFFFEECC;
     }
 
     private TextView label(String text, int size, int colour, int style) {
@@ -255,16 +314,53 @@ public class MainActivity extends Activity {
         int best = state.optInt("best", 0);
 
         muted = state.optBoolean("muted", muted);
+        totalTurns = state.optInt("total", totalTurns);
 
         if (scoreView == null) {
             return;
         }
 
-        scoreView.setText(Format.withCommas(Integer.toString(score)));
-        scoreView.setContentDescription("Score " + score);
-        turnsView.setText(turns + (turns == 1 ? " turn" : " turns"));
+        // the score counts up rather than jumping, so a big clear is felt
+        if (score != shownScore) {
+
+            ValueAnimator counter = ValueAnimator.ofInt(shownScore, score);
+
+            counter.setDuration(250);
+            counter.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                @Override
+                public void onAnimationUpdate(ValueAnimator animation) {
+                    int value = (Integer) animation.getAnimatedValue();
+                    scoreView.setText(Format.withCommas(Integer.toString(value)));
+                    scoreView.setContentDescription("Score " + value);
+                }
+            });
+
+            counter.start();
+            shownScore = score;
+        }
+
         bestView.setText("best " + best);
         soundView.setText(muted ? "Sound off" : "Sound on");
+
+        if (turns != lastTurns) {
+
+            boolean first = (lastTurns < 0);
+
+            lastTurns = turns;
+
+            turnsView.setText(turns + (turns == 1 ? " turn" : " turns"));
+            turnsView.setTextColor(turnsInk(turns));
+            turnFill.setBackgroundColor(turnsInk(turns));
+            turnFill.setScaleX(Math.max(0f, Math.min(1f, turns / (float) totalTurns)));
+
+            // the counter swells when a turn is spent, not when the app opens
+            if (!first) {
+                turnsView.animate().cancel();
+                turnsView.setScaleX(1.22f);
+                turnsView.setScaleY(1.22f);
+                turnsView.animate().scaleX(1f).scaleY(1f).setDuration(180).start();
+            }
+        }
     }
 
     /** the header reads its numbers the way the game writes them */
