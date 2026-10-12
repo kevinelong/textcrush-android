@@ -18,8 +18,8 @@ exponentially with the size of the run you clear, so one big group beats five sm
 
 | Artifact | Size | SHA-256 | Purpose |
 | --- | --- | --- | --- |
-| `textcrush-release.apk` | 206,173 bytes | `9848e77d5a1574b75105cd694e0968476d13960964a0f7185a789f97cc1bd954` | release-signed, for the phone — this is the published file |
-| `out/textcrush.apk` | 202,077 bytes | `0b972bb8baeb3419d5e5a09d0537b686b198ff023625c566eb3c07f867d8c7e9` | debug-signed, for the dev loop (`sh build.sh`) |
+| `textcrush-release.apk` | 206,173 bytes | `a13fec7ed1675a164b377ec42353cdef2f858992e661b894f72786cd7b2be2bc` | release-signed, for the phone — this is the published file |
+| `out/textcrush.apk` | 202,077 bytes | `24cf53962e554cac2a58e0284ff380cead8f194cc1daeba0c6c73a5e3f8670e1` | debug-signed, for the dev loop (`sh build.sh`) |
 
 Requires Android 5.0 (API 21) or newer. Portrait, full screen, screen stays awake while you play.
 
@@ -113,7 +113,10 @@ looked at:
   with their letters and positions, plus a live region for the score, and Enter plays a cell through
   the same pipeline as a tap - measured from "Score 0, 20 turns left" to "Score 4, 19 turns left".
   `uiautomator` sees the cells and the header's text.
-- **Landing squash, and the system's motion preference is honoured** (no deal-in, no fall, no pop, no
+- **The landing squash follows the tiles that moved**: only tiles that fell squashed, by how far they
+  fell (a one-bubble tap nudges the few tiles above it; a column collapse thuds). It used to squash all
+  64 tiles at once, which read as the whole board bouncing on any tap. The system's motion preference is
+  honoured too (no deal-in, no fall, no pop, no
   float when reduced motion is on: 6,412 painted samples at 80 ms normally against 36,798 with it
   reduced).
 - **The tap answers**: a pressed tile is drawn pressed before the run clears, the run shrinks away
@@ -149,7 +152,7 @@ looked at:
 ## Upstream and license
 
 The game itself lives in [kevinelong/textcrush](https://github.com/kevinelong/textcrush); `game/` here
-is that source at commit `8a50b9c`, vendored so the APK build has no external checkout. Everything
+is that source at commit `061bf95`, vendored so the APK build has no external checkout. Everything
 under `game/` is upstream's; the Android wrapper is this repository.
 
 Licensed under the **Functional Source License, Version 1.1, MIT Future License** (`FSL-1.1-MIT`) —
