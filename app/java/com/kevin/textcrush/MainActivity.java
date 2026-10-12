@@ -8,11 +8,13 @@ import android.os.Bundle;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.HapticFeedbackConstants;
 import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController;
 import android.view.WindowManager;
 import android.webkit.ConsoleMessage;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -89,6 +91,11 @@ public class MainActivity extends Activity {
             }
         });
 
+        // The game asks for a tap to be felt through window.TextCrush.tick(); a browser has no such
+        // thing, and navigator.vibrate is not available in a web view without the VIBRATE permission.
+        // No permission is needed for this, and the interface is only reachable from the bundled page.
+        web.addJavascriptInterface(new TapFeedback(), "TextCrush");
+
         // Content first: the window has no decor view until there is content, and asking it for the
         // insets controller before that throws on this platform (the first launch of this app died
         // exactly there). Hiding the bars afterwards costs nothing - the themed window is already
@@ -103,6 +110,33 @@ public class MainActivity extends Activity {
         immersive();
 
         web.loadUrl(GameAssets.ORIGIN + "/web/index.html");
+    }
+
+    /**
+     * The one call the page makes back into the app: a short tick when a run is cleared.
+     *
+     * The feedback has to run on the UI thread and on the web view's own view, so it is posted there
+     * rather than performed on the JavaScript bridge thread. A user who has turned system touch
+     * feedback off simply gets nothing, which is the correct behaviour.
+     */
+    private final class TapFeedback {
+
+        @JavascriptInterface
+        public void tick() {
+
+            WebView view = web;
+
+            if (view == null) {
+                return;
+            }
+
+            view.post(new Runnable() {
+                @Override
+                public void run() {
+                    web.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
+                }
+            });
+        }
     }
 
     /**

@@ -13,13 +13,13 @@ exponentially with the size of the run you clear, so one big group beats five sm
    and download `textcrush-release.apk`.
 2. Tap the downloaded file. Android will ask you to allow installing apps from this source - that is
    the standard prompt for any app that does not come from Play.
-3. Launch **Text Crush**. It is a 194 KB download that never asks for a permission and never goes
+3. Launch **Text Crush**. It is a 202 KB download that never asks for a permission and never goes
    online.
 
 | Artifact | Size | SHA-256 | Purpose |
 | --- | --- | --- | --- |
-| `textcrush-release.apk` | 197,981 bytes | `822a1d1c13bba693d70a24432e00c579be12e420433a4b0bb1d19bf5aac2b743` | release-signed, for the phone — this is the published file |
-| `out/textcrush.apk` | 193,885 bytes | `45bfe09641b2ca9ab9fe95ae1b52801b0ef6dde94bb9f72b4bd2050c75e7c9ca` | debug-signed, for the dev loop (`sh build.sh`) |
+| `textcrush-release.apk` | 202,077 bytes | `18afcd715784c8f292ab98b1943e8aa8ea09377c59cfdb38277c89c24d383d49` | release-signed, for the phone — this is the published file |
+| `out/textcrush.apk` | 193,885 bytes | `a16fa08fb142ad6fd7bff992c775928f3024a57963cf3e83ee937e01f0c476a9` | debug-signed, for the dev loop (`sh build.sh`) |
 
 Requires Android 5.0 (API 21) or newer. Portrait, full screen, screen stays awake while you play.
 
@@ -102,6 +102,17 @@ looked at:
   from a 26,640-entry lattice: measured, the closest pair on a board is dE 20.5 where 93% of boards
   used to hold a pair closer than dE 20, and the warm-white letter clears 4.5:1 on every tile where 57%
   of letters used to sit below 3:1.
+- **The tap answers**: a pressed tile is drawn pressed before the run clears, the run shrinks away
+  over 110 ms instead of blinking out, and what it scored ("+16") rises from where it stood. A tap
+  also asks the app for a short haptic tick through a small JavaScript bridge - measured on the AVD:
+  three taps on the board added two recorded vibrations.
+- **The score line is legible and safe**: cream ink on a dark outline (15.98:1) instead of #333333
+  fill on a #ffeecc outline (1.45:1), and tiles are clipped to the board so a refill can no longer
+  paint over it. Measured: the saturated pixel count inside the HUD band is identical settled and
+  mid-deal-in, and the dominant ink pixel is 255,238,204.
+- **The game-over card is stacked, not clipped**: recorded text calls land at "Game Over" y=195,
+  "Previous High Score:" y=245, the score y=296 and "Tap to Continue" y=436, all inside the canvas,
+  where a single 40-character line used to run off both edges.
 - **Audio works without a tap first**: a fresh `AudioContext` reports `running`, i.e. the WebView is
   allowed to play the game's notes (`setMediaPlaybackRequiresUserGesture(false)`).
 
@@ -124,7 +135,7 @@ looked at:
 ## Upstream and license
 
 The game itself lives in [kevinelong/textcrush](https://github.com/kevinelong/textcrush); `game/` here
-is that source at commit `938df7c`, vendored so the APK build has no external checkout. Everything
+is that source at commit `bd1b349`, vendored so the APK build has no external checkout. Everything
 under `game/` is upstream's; the Android wrapper is this repository.
 
 Licensed under the **Functional Source License, Version 1.1, MIT Future License** (`FSL-1.1-MIT`) —
