@@ -13,13 +13,13 @@ exponentially with the size of the run you clear, so one big group beats five sm
    and download `textcrush-release.apk`.
 2. Tap the downloaded file. Android will ask you to allow installing apps from this source - that is
    the standard prompt for any app that does not come from Play.
-3. Launch **Text Crush**. It is a 202 KB download that never asks for a permission and never goes
+3. Launch **Text Crush**. It is a 206 KB download that never asks for a permission and never goes
    online.
 
 | Artifact | Size | SHA-256 | Purpose |
 | --- | --- | --- | --- |
-| `textcrush-release.apk` | 202,077 bytes | `18afcd715784c8f292ab98b1943e8aa8ea09377c59cfdb38277c89c24d383d49` | release-signed, for the phone — this is the published file |
-| `out/textcrush.apk` | 193,885 bytes | `a16fa08fb142ad6fd7bff992c775928f3024a57963cf3e83ee937e01f0c476a9` | debug-signed, for the dev loop (`sh build.sh`) |
+| `textcrush-release.apk` | 206,173 bytes | `9848e77d5a1574b75105cd694e0968476d13960964a0f7185a789f97cc1bd954` | release-signed, for the phone — this is the published file |
+| `out/textcrush.apk` | 202,077 bytes | `0b972bb8baeb3419d5e5a09d0537b686b198ff023625c566eb3c07f867d8c7e9` | debug-signed, for the dev loop (`sh build.sh`) |
 
 Requires Android 5.0 (API 21) or newer. Portrait, full screen, screen stays awake while you play.
 
@@ -102,6 +102,20 @@ looked at:
   from a 26,640-entry lattice: measured, the closest pair on a board is dE 20.5 where 93% of boards
   used to hold a pair closer than dE 20, and the warm-white letter clears 4.5:1 on every tile where 57%
   of letters used to sit below 3:1.
+- **The score line is native Android text now**: the game is loaded with `hud=off` and keeps no room for
+  its own score line, so the header shows the score, turns left, best and the sound button as real
+  views - crisp at the screen's density, scalable with the system font setting, and readable by a
+  screen reader. The page reports its state to the app through a small bridge, and the board takes the
+  whole square: measured `scoreHeight` 0, tile step 55 -> 61 px, board 491 px across the canvas. A tap
+  in the header cannot reach the game at all; a board tap moves both the board and the header (the
+  script checks both).
+- **The board is reachable without seeing it.** The canvas has a clipped DOM mirror of the 64 cells
+  with their letters and positions, plus a live region for the score, and Enter plays a cell through
+  the same pipeline as a tap - measured from "Score 0, 20 turns left" to "Score 4, 19 turns left".
+  `uiautomator` sees the cells and the header's text.
+- **Landing squash, and the system's motion preference is honoured** (no deal-in, no fall, no pop, no
+  float when reduced motion is on: 6,412 painted samples at 80 ms normally against 36,798 with it
+  reduced).
 - **The tap answers**: a pressed tile is drawn pressed before the run clears, the run shrinks away
   over 110 ms instead of blinking out, and what it scored ("+16") rises from where it stood. A tap
   also asks the app for a short haptic tick through a small JavaScript bridge - measured on the AVD:
@@ -135,7 +149,7 @@ looked at:
 ## Upstream and license
 
 The game itself lives in [kevinelong/textcrush](https://github.com/kevinelong/textcrush); `game/` here
-is that source at commit `bd1b349`, vendored so the APK build has no external checkout. Everything
+is that source at commit `8a50b9c`, vendored so the APK build has no external checkout. Everything
 under `game/` is upstream's; the Android wrapper is this repository.
 
 Licensed under the **Functional Source License, Version 1.1, MIT Future License** (`FSL-1.1-MIT`) —
