@@ -1,0 +1,3 @@
+# The game is vendored from kevinelong/textcrush; the wrapper is the code that lives here,
+# so keep it out of the language statistics and the diff noise.
+game/** linguist-vendored
