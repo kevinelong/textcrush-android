@@ -13,13 +13,13 @@ exponentially with the size of the run you clear, so one big group beats five sm
    and download `textcrush-release.apk`.
 2. Tap the downloaded file. Android will ask you to allow installing apps from this source - that is
    the standard prompt for any app that does not come from Play.
-3. Launch **Text Crush**. It is a 194 KB download that never asks for a permission and never goes
+3. Launch **Text Crush**. It is a 198 KB download that never asks for a permission and never goes
    online.
 
 | Artifact | Size | SHA-256 | Purpose |
 | --- | --- | --- | --- |
-| `textcrush-release.apk` | 193,885 bytes | `1edcc699caba284712fbe33908b170b0737d9ef5789421ea06ebab7ac1847a5f` | release-signed, for the phone — this is the published file |
-| `out/textcrush.apk` | 189,789 bytes | rebuilt per checkout | debug-signed, for the dev loop (`sh build.sh`) |
+| `textcrush-release.apk` | 197,981 bytes | `9e2542e9b4d659eb5568a924b4430e28e9751600143a18064c2bde8a448f8c39` | release-signed, for the phone — this is the published file |
+| `out/textcrush.apk` | 189,789 bytes | `e477eeddb7820cb2db1a26afe929ae397fe2bfeeeea89099569931097423f1e4` | debug-signed, for the dev loop (`sh build.sh`) |
 
 Requires Android 5.0 (API 21) or newer. Portrait, full screen, screen stays awake while you play.
 
@@ -81,6 +81,11 @@ looked at:
 - **It runs and paints**: the board, score line and turn counter render, and a tap changes the score
   line and the board (`tools/verify-ui.sh` reports the sampled pixel counts and the image diff).
 - **No crash**, and `dumpsys package com.kevin.textcrush` lists **no requested permissions**.
+- **Taps outside the board do nothing.** The square the game draws in is nine rows tall and the score
+  line keeps the top one, so a tap there is a tap on the game. It used to index past the board
+  (`positions[y*size + x]` with a negative index), throw, and - because the board had already been
+  marked busy - leave the game frozen for good. `tools/verify-ui.sh` now taps that line three times
+  and checks the score line is byte-identical afterwards and still responds to a real tap.
 - **The animations were stepped frame by frame inside the app's own WebView** (WebView devtools over
   `adb forward tcp:9222 localabstract:webview_devtools_remote_<pid>`): the deal-in drew 2,583
   sampled pixels blank, 47,103 mid-way and 94,717 when settled, and a fall showed all 64 cells placed
@@ -113,7 +118,7 @@ looked at:
 ## Upstream and license
 
 The game itself lives in [kevinelong/textcrush](https://github.com/kevinelong/textcrush); `game/` here
-is that source at commit `d393d4e`, vendored so the APK build has no external checkout. Everything
+is that source at commit `6b17085`, vendored so the APK build has no external checkout. Everything
 under `game/` is upstream's; the Android wrapper is this repository.
 
 Licensed under the **Functional Source License, Version 1.1, MIT Future License** (`FSL-1.1-MIT`) —

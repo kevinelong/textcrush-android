@@ -72,14 +72,29 @@ $ADBS shell am start -W -n $APP/.MainActivity | grep -E "LaunchState"
 sleep 4
 shoot 03-relaunch
 
+# Regression: the square the game draws in is 9 rows tall and the score line keeps the top one, so a
+# tap there is a tap on the game and used to index past the board (positions[y*size + x] with y = -1),
+# throw, and leave the board's busy flag set - which froze the game for good. Stray taps must now do
+# nothing at all, and the board must still answer afterwards.
+echo
+echo "== stray taps in the score line, then a real one =="
+STRAY_Y=$(( (H - W) / 2 + STEP / 2 ))
+for i in 1 2 3; do $ADBS shell input tap "$TAP_X" "$STRAY_Y"; sleep 0.5; done
+sleep 1
+shoot 04-stray-taps
+$ADBS shell input tap "$TAP_X" "$TAP_Y"
+sleep 2
+shoot 05-after-stray-taps
+
 echo
 echo "== measurements =="
-python - "$OUT" <<'PY'
+python - "$OUT" "${STEP}" "$(( (H - W) / 2 ))" <<'PY'
 import os, sys
 from PIL import Image, ImageChops
 
 out = sys.argv[1]
-NAMES = ["01-board.png", "02-after-tap.png", "03-relaunch.png"]
+step, top = int(sys.argv[2]), int(sys.argv[3])
+NAMES = ["01-board.png", "02-after-tap.png", "03-relaunch.png", "04-stray-taps.png", "05-after-stray-taps.png"]
 
 def load(name):
     image = Image.open(os.path.join(out, name)).convert("RGB")
@@ -95,9 +110,15 @@ for name in NAMES:
     images[name] = image
     print(f"{name}: {drawn} non-background samples of {(w // 4) * (h // 4)} ({100 * drawn / ((w // 4) * (h // 4)):.0f}%), {os.path.getsize(os.path.join(out, name))} bytes")
 
+def hud(name):
+    """The score line: the band the game reserves above the first tile row."""
+    return images[name].crop((0, top, images[name].size[0], top + step))
+
 board = images["01-board.png"]
 print("board vs after-tap differs:", ImageChops.difference(board, images["02-after-tap.png"]).getbbox() is not None)
 print("board vs relaunch differs: ", ImageChops.difference(board, images["03-relaunch.png"]).getbbox() is not None)
+print("hud unchanged by 3 stray taps:  ", ImageChops.difference(hud("03-relaunch.png"), hud("04-stray-taps.png")).getbbox() is None)
+print("hud changes on the next real tap:", ImageChops.difference(hud("04-stray-taps.png"), hud("05-after-stray-taps.png")).getbbox() is not None)
 PY
 
 echo
