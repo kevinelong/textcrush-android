@@ -13,13 +13,13 @@ exponentially with the size of the run you clear, so one big group beats five sm
    and download `textcrush-release.apk`.
 2. Tap the downloaded file. Android will ask you to allow installing apps from this source - that is
    the standard prompt for any app that does not come from Play.
-3. Launch **Text Crush**. It is a 198 KB download that never asks for a permission and never goes
+3. Launch **Text Crush**. It is a 194 KB download that never asks for a permission and never goes
    online.
 
 | Artifact | Size | SHA-256 | Purpose |
 | --- | --- | --- | --- |
-| `textcrush-release.apk` | 197,981 bytes | `9e2542e9b4d659eb5568a924b4430e28e9751600143a18064c2bde8a448f8c39` | release-signed, for the phone — this is the published file |
-| `out/textcrush.apk` | 189,789 bytes | `e477eeddb7820cb2db1a26afe929ae397fe2bfeeeea89099569931097423f1e4` | debug-signed, for the dev loop (`sh build.sh`) |
+| `textcrush-release.apk` | 197,981 bytes | `822a1d1c13bba693d70a24432e00c579be12e420433a4b0bb1d19bf5aac2b743` | release-signed, for the phone — this is the published file |
+| `out/textcrush.apk` | 193,885 bytes | `45bfe09641b2ca9ab9fe95ae1b52801b0ef6dde94bb9f72b4bd2050c75e7c9ca` | debug-signed, for the dev loop (`sh build.sh`) |
 
 Requires Android 5.0 (API 21) or newer. Portrait, full screen, screen stays awake while you play.
 
@@ -96,6 +96,12 @@ looked at:
   (`https://appassets.textcrush.local`). That origin is why the app hosts the page from its assets
   rather than opening it as a `file://` document — a `file://` page has no durable storage, and a
   randomly chosen loopback port would have moved the origin on every launch and silently reset it.
+- **The board is drawn at the screen's density and the palette is deliberate.** The canvas carries
+  one backing pixel per device pixel (1081x1081 on this 440 dpi screen) instead of being rasterised at
+  393 px and stretched 2.75x, and the eight tile colours are a fixed set rather than eight random picks
+  from a 26,640-entry lattice: measured, the closest pair on a board is dE 20.5 where 93% of boards
+  used to hold a pair closer than dE 20, and the warm-white letter clears 4.5:1 on every tile where 57%
+  of letters used to sit below 3:1.
 - **Audio works without a tap first**: a fresh `AudioContext` reports `running`, i.e. the WebView is
   allowed to play the game's notes (`setMediaPlaybackRequiresUserGesture(false)`).
 
@@ -118,7 +124,7 @@ looked at:
 ## Upstream and license
 
 The game itself lives in [kevinelong/textcrush](https://github.com/kevinelong/textcrush); `game/` here
-is that source at commit `6b17085`, vendored so the APK build has no external checkout. Everything
+is that source at commit `938df7c`, vendored so the APK build has no external checkout. Everything
 under `game/` is upstream's; the Android wrapper is this repository.
 
 Licensed under the **Functional Source License, Version 1.1, MIT Future License** (`FSL-1.1-MIT`) —

@@ -41,6 +41,10 @@ cp -r "$ROOT/game/source/web"  "$B/assets/www/web"
 cp -r "$ROOT/game/source/game" "$B/assets/www/game"
 find "$B/assets" -name '*.ts' -delete
 find "$B/assets" -name '*.iml' -delete
+# The web build can also be installed in a browser, and that is what the manifest, the icon set and
+# the service worker are for. Inside the APK they are dead weight: the assets are already local, the
+# launcher icon is the native one, and a worker would only fail to register (it is staged out).
+rm -rf "$B/assets/www/web/icons" "$B/assets/www/web/manifest.webmanifest" "$B/assets/www/web/sw.js"
 [ -f "$B/assets/www/web/index.html" ] || { echo "game/ is not vendored - see UPSTREAM"; exit 1; }
 find "$B/assets" -type f | wc -l | tr -d ' ' | sed 's/^/staged files: /'
 
@@ -64,8 +68,8 @@ echo "== aapt2 link =="
   --java "$WIN/build/gen" \
   --min-sdk-version 21 \
   --target-sdk-version 34 \
-  --version-code 2 \
-  --version-name 1.1 \
+  --version-code 3 \
+  --version-name 1.2 \
   $DEBUG_FLAG \
   "$WIN/build/res.zip"
 
