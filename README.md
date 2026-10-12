@@ -18,8 +18,8 @@ exponentially with the size of the run you clear, so one big group beats five sm
 
 | Artifact | Size | SHA-256 | Purpose |
 | --- | --- | --- | --- |
-| `textcrush-release.apk` | 206,173 bytes | `a13fec7ed1675a164b377ec42353cdef2f858992e661b894f72786cd7b2be2bc` | release-signed, for the phone — this is the published file |
-| `out/textcrush.apk` | 202,077 bytes | `24cf53962e554cac2a58e0284ff380cead8f194cc1daeba0c6c73a5e3f8670e1` | debug-signed, for the dev loop (`sh build.sh`) |
+| `textcrush-release.apk` | 206,173 bytes | `1c269a2b4afa2193d53b859f4bdc36aba6d2b7945a602d1404293a2520985875` | release-signed, for the phone — this is the published file |
+| `out/textcrush.apk` | 202,077 bytes | `a4040eb3ce521e40a5c04577285945f9687c25a3fcf60b1f94e538fdbb98e223` | debug-signed, for the dev loop (`sh build.sh`) |
 
 Requires Android 5.0 (API 21) or newer. Portrait, full screen, screen stays awake while you play.
 
@@ -152,7 +152,7 @@ looked at:
 ## Upstream and license
 
 The game itself lives in [kevinelong/textcrush](https://github.com/kevinelong/textcrush); `game/` here
-is that source at commit `061bf95`, vendored so the APK build has no external checkout. Everything
+is that source at commit `8ad1caf`, vendored so the APK build has no external checkout. Everything
 under `game/` is upstream's; the Android wrapper is this repository.
 
 Licensed under the **Functional Source License, Version 1.1, MIT Future License** (`FSL-1.1-MIT`) —
