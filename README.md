@@ -18,8 +18,8 @@ exponentially with the size of the run you clear, so one big group beats five sm
 
 | Artifact | Size | SHA-256 | Purpose |
 | --- | --- | --- | --- |
-| `textcrush-release.apk` | 206,173 bytes | `1c269a2b4afa2193d53b859f4bdc36aba6d2b7945a602d1404293a2520985875` | release-signed, for the phone — this is the published file |
-| `out/textcrush.apk` | 202,077 bytes | `a4040eb3ce521e40a5c04577285945f9687c25a3fcf60b1f94e538fdbb98e223` | debug-signed, for the dev loop (`sh build.sh`) |
+| `textcrush-release.apk` | 206,173 bytes | `8b78025c0cff945390ea19a5a2caf467730cbd4f3d2e2c230d17cc0adc83efc7` | release-signed, for the phone — this is the published file |
+| `out/textcrush.apk` | 202,077 bytes | `f6dd902ad43debfebd2f66e4ac9f30e56415451449731582a161dabdbe7f8d64` | debug-signed, for the dev loop (`sh build.sh`) |
 
 Requires Android 5.0 (API 21) or newer. Portrait, full screen, screen stays awake while you play.
 
@@ -119,6 +119,10 @@ looked at:
   honoured too (no deal-in, no fall, no pop, no
   float when reduced motion is on: 6,412 painted samples at 80 ms normally against 36,798 with it
   reduced).
+- **A game in progress survives a restart**: the board, score and turns are kept on the device, so
+  putting the phone down (or the system killing the app) and coming back resumes exactly where you
+  were. Measured on the emulator: two moves, `am force-stop`, relaunch - the same score, the same
+  turns and the same five sampled cells. The state is dropped when the game ends.
 - **The tap answers**: a pressed tile is drawn pressed before the run clears, the run shrinks away
   over 110 ms instead of blinking out, and what it scored ("+16") rises from where it stood. A tap
   also asks the app for a short haptic tick through a small JavaScript bridge - measured on the AVD:
@@ -152,7 +156,7 @@ looked at:
 ## Upstream and license
 
 The game itself lives in [kevinelong/textcrush](https://github.com/kevinelong/textcrush); `game/` here
-is that source at commit `8ad1caf`, vendored so the APK build has no external checkout. Everything
+is that source at commit `a073380`, vendored so the APK build has no external checkout. Everything
 under `game/` is upstream's; the Android wrapper is this repository.
 
 Licensed under the **Functional Source License, Version 1.1, MIT Future License** (`FSL-1.1-MIT`) —

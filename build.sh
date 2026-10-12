@@ -68,8 +68,8 @@ echo "== aapt2 link =="
   --java "$WIN/build/gen" \
   --min-sdk-version 21 \
   --target-sdk-version 34 \
-  --version-code 7 \
-  --version-name 1.6 \
+  --version-code 8 \
+  --version-name 1.7 \
   $DEBUG_FLAG \
   "$WIN/build/res.zip"
 
