@@ -7,6 +7,14 @@ exponentially with the size of the run you clear, so one big group beats five sm
 
 ![The board](docs/screenshot-board.png)
 
+The rules, one tap from the header or shown once on a fresh install:
+
+![The rules](docs/screenshot-rules.png)
+
+The end card, which arrives line by line and leaves before the next board:
+
+![Game Over](docs/screenshot-card.png)
+
 ## Install
 
 1. On your phone, open **[Releases](https://github.com/kevinelong/textcrush-android/releases/latest)**
@@ -18,8 +26,8 @@ exponentially with the size of the run you clear, so one big group beats five sm
 
 | Artifact | Size | SHA-256 | Purpose |
 | --- | --- | --- | --- |
-| `textcrush-release.apk` | 210,269 bytes | `a8c47cc37e6257284f4806ed41a1abc99f47846b0551ffe6307df8ddd3583587` | release-signed, for the phone — this is the published file |
-| `out/textcrush.apk` | 206,173 bytes | `152d9ec1cbf97bc9520abe17999c5546bc4e019e5d2257f1b07115e00ea02522` | debug-signed, for the dev loop (`sh build.sh`) |
+| `textcrush-release.apk` | 210,269 bytes | `74577c22b6a8b041940fc827e8bae3be790011100aafa5287cd001d777ef3552` | release-signed, for the phone — this is the published file |
+| `out/textcrush.apk` | 206,173 bytes | `d355f95c324581883708b1dd03c4ca6e89ad54a98f38c21cf40826e82c2e187b` | debug-signed, for the dev loop (`sh build.sh`) |
 
 Requires Android 5.0 (API 21) or newer. Portrait, full screen, screen stays awake while you play.
 
@@ -127,6 +135,10 @@ looked at:
   device pixels wide at 20 / 5 / 2 turns.
 - **The end card arrives and leaves**: the dim ramps in, the lines rise in turn, the prompt pulses, and
   the card fades out before the next board is dealt. The score counts up rather than jumping.
+- **The game's own faces draw inside the wrapper too**: with the header owning the score line, the
+  game's rules screen, end card and score pops were being sized from a height that no longer existed,
+  so `0px` type drew nothing - the rules came up as a dimmed board with no words on it. Measured on
+  the emulator, same build: ink in the rules band 0 -> 667 sampled cream pixels, and 1107 in the card.
 - **A game in progress survives a restart**: the board, score and turns are kept on the device, so
   putting the phone down (or the system killing the app) and coming back resumes exactly where you
   were. Measured on the emulator: two moves, `am force-stop`, relaunch - the same score, the same
@@ -164,7 +176,7 @@ looked at:
 ## Upstream and license
 
 The game itself lives in [kevinelong/textcrush](https://github.com/kevinelong/textcrush); `game/` here
-is that source at commit `df17c8d`, vendored so the APK build has no external checkout. Everything
+is that source at commit `b8d04bc0`, vendored so the APK build has no external checkout. Everything
 under `game/` is upstream's; the Android wrapper is this repository.
 
 Licensed under the **Functional Source License, Version 1.1, MIT Future License** (`FSL-1.1-MIT`) —

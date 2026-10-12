@@ -1,6 +1,6 @@
 The web game, vendored from https://github.com/kevinelong/textcrush
 
-commit: df17c8d9ac397a924ed2d5ee146db97ab2d185e1
+commit: b8d04bc0
 copied: source/web and source/game (TypeScript sources, the compiled JavaScript and the HTML).
 
 build.sh stages only the runtime files (js, js.map, html) from here into the APK assets, so the
