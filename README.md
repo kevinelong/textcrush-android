@@ -85,6 +85,9 @@ sh tools/run-emulator.sh     # boot it headless; add "window" to watch it on the
 The `toolchain/` directory is git-ignored. `tools/bootstrap.sh` builds it; if you already have a
 toolchain from another project, link it in instead (`mklink /J toolchain <other>\toolchain`).
 
+`docs/STATE.md` records where the release stands, what the checks say, and what is waiting to be
+pushed.
+
 **Keep `tools/release.keystore` and `tools/release-credentials.txt`.** They are git-ignored, they are
 the app's permanent signing identity, and losing them means never being able to update an installed
 copy of the app. Copy both somewhere off this machine.
