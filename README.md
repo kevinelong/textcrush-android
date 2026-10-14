@@ -62,6 +62,8 @@ sh tools/bootstrap.sh        # one-off: portable JDK 17 + cmdline-tools + platfo
 sh build.sh                  # -> out/textcrush.apk          (debug-signed, ~4 s)
 SIGN=release sh build.sh     # -> out/textcrush-release.apk  (needs tools/make-release-key.sh once)
 sh tools/verify-ui.sh        # install on a running emulator/device and play the game
+sh tools/check-version.sh    # the built APK reports the version app/AndroidManifest.xml declares
+sh tools/check-game.sh       # game/ is upstream's game at the commit in game/UPSTREAM
 ```
 
 Pipeline: stage the web build into assets -> `aapt2 compile` -> `aapt2 link` ->
@@ -72,6 +74,8 @@ source maps and HTML the page loads at runtime reach the APK.
 The app's version identity is `app/AndroidManifest.xml` (`versionCode`/`versionName`). `aapt2 link`
 does not override them — a manifest that declares both wins — so a release bumps them there and
 nowhere else, and `aapt2 dump badging out/textcrush-release.apk` is what says which version ships.
+`sh build.sh` runs `tools/check-version.sh` at the end of every build for that reason: a build whose
+artifact disagrees with the manifest fails instead of being published.
 
 ```sh
 sh tools/make-avd.sh         # create the throwaway verification AVD (Android 14, pixel_5)
@@ -174,7 +178,8 @@ looked at:
 
 The game itself lives in [kevinelong/textcrush](https://github.com/kevinelong/textcrush); `game/` here
 is that source at commit `b8d04bc0`, vendored so the APK build has no external checkout. Everything
-under `game/` is upstream's; the Android wrapper is this repository.
+under `game/` is upstream's; the Android wrapper is this repository. `sh tools/check-game.sh`
+compares the vendored copy against that commit, so a stale copy is visible rather than assumed.
 
 Licensed under the **Functional Source License, Version 1.1, MIT Future License** (`FSL-1.1-MIT`) —
 see [LICENSE.md](LICENSE.md). In short: use, copy, modify and redistribute it freely, including

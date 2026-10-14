@@ -137,6 +137,8 @@ echo "-- debuggable / testOnly in the manifest (both must be absent from a relea
 echo "-- permissions requested --"
 "$BT/aapt2.exe" dump badging "$WIN/out/$APK" | grep -E "^uses-permission" || echo "  none"
 "$BT/aapt2.exe" dump badging "$WIN/out/$APK" | grep -E "^package|^application-label:|^sdkVersion|^targetSdkVersion" | head -5
+echo "-- the version the APK reports is the version app/AndroidManifest.xml declares --"
+sh "$ROOT/tools/check-version.sh" "$ROOT/out/$APK"
 echo "-- size and digest --"
 ls -l "$OUT/$APK" | awk '{print $5" bytes"}'
 sha256sum "$OUT/$APK"
