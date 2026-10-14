@@ -21,13 +21,13 @@ The end card, which arrives line by line and leaves before the next board:
    and download `textcrush-release.apk`.
 2. Tap the downloaded file. Android will ask you to allow installing apps from this source - that is
    the standard prompt for any app that does not come from Play.
-3. Launch **Text Crush**. It is a 206 KB download that never asks for a permission and never goes
-   online.
+3. Launch **Text Crush**. It is a 210,269-byte download that never asks for a permission and never
+   goes online.
 
 | Artifact | Size | SHA-256 | Purpose |
 | --- | --- | --- | --- |
-| `textcrush-release.apk` | 210,269 bytes | `74577c22b6a8b041940fc827e8bae3be790011100aafa5287cd001d777ef3552` | release-signed, for the phone — this is the published file |
-| `out/textcrush.apk` | 206,173 bytes | `d355f95c324581883708b1dd03c4ca6e89ad54a98f38c21cf40826e82c2e187b` | debug-signed, for the dev loop (`sh build.sh`) |
+| `textcrush-release.apk` | 210,269 bytes | `b12ae94c1b53ab72a6ac897d5bf4f001c98e31fe183ed7ab7b6740c72e8b4a87` | release-signed, for the phone — this is the published file |
+| `out/textcrush.apk` | 206,173 bytes | `e431f3c10626d3cd5e2e2305a1446970d15f7dc337102a43ffdd3c5782df3811` | debug-signed, for the dev loop (`sh build.sh`) |
 
 Requires Android 5.0 (API 21) or newer. Portrait, full screen, screen stays awake while you play.
 
@@ -68,6 +68,10 @@ Pipeline: stage the web build into assets -> `aapt2 compile` -> `aapt2 link` ->
 `javac` (source/target 8 against `android.jar`) -> `d8` -> splice `classes.dex` into the resource APK
 -> `zipalign` -> `apksigner`. The TypeScript sources in `game/` are not shipped; only the JavaScript,
 source maps and HTML the page loads at runtime reach the APK.
+
+The app's version identity is `app/AndroidManifest.xml` (`versionCode`/`versionName`). `aapt2 link`
+does not override them — a manifest that declares both wins — so a release bumps them there and
+nowhere else, and `aapt2 dump badging out/textcrush-release.apk` is what says which version ships.
 
 ```sh
 sh tools/make-avd.sh         # create the throwaway verification AVD (Android 14, pixel_5)
@@ -163,13 +167,6 @@ looked at:
   dimension, so the wrapper gives it a square of the display width and centres it rather than
   leaving the board pinned to the top of a tall phone. A phone screen is much taller than it is
   wide, so there is background above and below — the game itself draws into that square.
-- **The rendering is slightly soft on high-density screens.** The game sizes its canvas in CSS
-  pixels rather than device pixels, so a 3x screen gets a 1x canvas scaled up. Fixing it is a small
-  change in the game repository (canvas backing store times `devicePixelRatio`, and the same factor
-  on the tap coordinates).
-- **The game-over message can run off the edges.** `Display.middleCenterText` draws the whole
-  message — which contains newlines — as a single line, so on a narrow screen it is clipped. That is
-  the upstream game's own text rendering, unchanged here; the fix belongs in the game repository.
 - **Portrait only.** Rotating would re-lay-out a canvas that the game sizes only at load, so the
   activity is locked to portrait.
 

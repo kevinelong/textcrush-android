@@ -60,6 +60,10 @@ if [ "$MODE" = debug ]; then
 fi
 
 echo "== aapt2 link =="
+# The app's version identity lives in app/AndroidManifest.xml. aapt2 link's --version-code and
+# --version-name are not an override: a manifest that declares them wins, which is why passing them
+# here left the "1.9" build shipping as versionCode 9 / versionName 1.8 (measured with
+# aapt2 dump badging on the built APK).
 "$BT/aapt2.exe" link \
   -o "$WIN/build/base.apk" \
   -I "$AAR" \
@@ -68,8 +72,6 @@ echo "== aapt2 link =="
   --java "$WIN/build/gen" \
   --min-sdk-version 21 \
   --target-sdk-version 34 \
-  --version-code 10 \
-  --version-name 1.9 \
   $DEBUG_FLAG \
   "$WIN/build/res.zip"
 
