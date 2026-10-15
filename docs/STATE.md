@@ -4,10 +4,17 @@ Where this repository is right now: what the last change was, what the release i
 what is next, and what is waiting on Kevin. The README says what the app is; this says where it
 stands.
 
-## Now (2026-10-14)
+## Now (2026-10-15)
 
 - Branch `main`. The commit before this note is `8cb327a` — "tools: check the APK's version and the
   vendored game, from the artifact".
+- **Both checks were re-run on 2026-10-15, from the existing artifact, with no build.** `sh
+  tools/check-version.sh` → `app/AndroidManifest.xml: versionCode 10, versionName 1.9`, `the built APK
+  reports: versionCode 10, versionName 1.9`, `the APK carries the version in the manifest`, exit 0;
+  `sh tools/check-game.sh` → `files: 75 vendored, 75 upstream`, `the vendored game matches upstream at
+  b8d04bc0`, exit 0. Both are green, and neither needed an emulator.
+- The APK the version check read is `out/textcrush-release.apk`, 210,269 bytes, sha256 `b12ae94c…` —
+  the same digest the published release asset reports, read again today.
 - **Published release:** `v1.9`, no longer a draft, tag `v1.9` on `6f14000`. Its asset
   `textcrush-release.apk` is 210,269 bytes, sha256
   `b12ae94c1b53ab72a6ac897d5bf4f001c98e31fe183ed7ab7b6740c72e8b4a87`, and `aapt2 dump badging` on the
@@ -28,6 +35,11 @@ stands.
 `8cb327a`: `tools/check-version.sh` and `tools/check-game.sh`, wired into `build.sh`, plus the
 README's account of where the version identity lives and how to check the vendored game.
 
+**2026-10-15: `docs/STATE.md` and the README's description of it, nothing else.** The push status was
+wrong in the direction that matters — it said nothing had been pushed when the branch had been pushed
+the day before — so it now carries the reflog line, the `ls-remote` answer and the release's own
+digest. Both checks were re-run and are still green; no build was run.
+
 ## Next
 
 1. Nothing is pending in this repository's code.
@@ -37,31 +49,79 @@ README's account of where the version identity lives and how to check the vendor
 3. The `.gitattributes` decision below, if the digests should be reproducible from a fresh clone.
 4. A newer upstream game is picked up by re-vendoring `game/` and updating the commit in
    `game/UPSTREAM` together, then trusting `tools/check-game.sh` to say whether it was done right.
+   No re-vendoring is due: no commit in `tc` after `b8d04bc0` touches `source/` (`git -C ../tc diff
+   --stat b8d04bc0..HEAD -- source/` is empty as of 2026-10-15), so the pin names an older commit
+   but the copy is content-current.
+5. **Kevin: who authorised the 2026-10-14 push, and does the hold still cover this repository?**
+   See Push status. The signing-identity backup above needs no decision and should happen first.
 
-## Awaiting Kevin's approval to push
+## Push status (exact, checked 2026-10-15)
 
-**Nothing here has been pushed.** As of this note the branch is **2 commits ahead of `origin/main`**:
+**One commit is unpushed, and it is this note.** `git log --oneline origin/main..HEAD` lists exactly
+the commit carrying this file, so the branch is 1 ahead. Everything before it is on the remote: with
+that commit set aside, `git status -sb` prints `## main...origin/main` with no `[ahead]` — the branch
+is 0 ahead / 0 behind the remote, not the 2 ahead this note claimed on 2026-10-14.
+
+**The push happened at 2026-10-14 13:52:15 -0700**, an hour and twenty-three minutes after the two
+commits were written and after the earlier version of this note said nothing had been pushed:
 
 ```
-git log --oneline origin/main..HEAD
+$ git reflog show origin/main
+10117f0 refs/remotes/origin/main@{2026-10-14 13:52:15 -0700}: update by push
 
-8cb327a  tools: check the APK's version and the vendored game, from the artifact
-         (this note's own commit, on top of it)
+$ git ls-remote origin
+10117f0b5330cdb34202ed4a7594225c4da864ab        HEAD
+10117f0b5330cdb34202ed4a7594225c4da864ab        refs/heads/main
+
+$ gh repo view kevinelong/textcrush-android --json visibility,pushedAt --template '{{.visibility}} pushedAt={{.pushedAt}}'
+PUBLIC pushedAt=2026-10-14T20:52:15Z
 ```
 
-Neither commit changes the published release: `v1.9` and its asset were published earlier with
-Kevin's approval and are untouched by these two.
+`ls-remote` asks the remote rather than a local tracking ref, so `refs/heads/main` at `10117f0` is the
+published state of the public repository and not a stale local ref.
+
+**What that push published, and what it did not.** There is no `.github` directory in this repository,
+so no workflow ran on it — `gh run list` returns nothing. A branch push does not move tags, and the
+tags and the release are untouched (fields read out of the JSON, one per line):
+
+```
+$ git ls-remote --tags origin          (last line)
+6f14000a11fca0012cd0e06d5ab713a98b4da471        v1.9
+
+$ gh release view v1.9 --repo kevinelong/textcrush-android --json isDraft,publishedAt,assets
+isDraft              false
+publishedAt          2026-10-14T17:10:22Z
+assets[0].name       textcrush-release.apk
+assets[0].size       210269
+assets[0].digest     sha256:b12ae94c1b53ab72a6ac897d5bf4f001c98e31fe183ed7ab7b6740c72e8b4a87
+```
+
+So the push published **the branch's commits only** — `app/`, `game/`, `tools/` and `docs/` sources in
+a repository that was already public. It did not touch `v1.9` (still Latest, published with Kevin's
+approval at 2026-10-14T17:10:22Z, three hours before this push), did not create a tag, and published
+no new APK. The published asset's digest still equals the APK in this checkout to the byte.
+
+**Who authorised that push is not recorded in this repository, and that is Kevin's to answer.** The
+standing rule for these three is commit locally and stop. Nothing has been pushed since, so the only
+unpushed commit now is the one carrying this note.
+
+**What a push from here would publish, going forward:** the branch's commits and nothing else. Nothing
+in this repository reacts to a push, a tag moves only when it is pushed explicitly, and publishing a
+release is a separate act from pushing a branch.
 
 ## Open decisions (Kevin's)
 
 - **`.gitattributes` with `* text=auto eol=lf` — and this is the repository that needs it.**
-  `core.autocrlf=true` means a fresh clone or a plain `git checkout` materialises text files as CRLF,
-  and the same commit then builds to `8b3ae0d9…` instead of the published `b12ae94c…`: a functionally
-  identical APK (same version stamp, same code) whose only differences are the line endings of
-  `Board.js` and of the compiled manifest, with `git status` still reporting clean. So the digests in
-  the README and in the release notes cannot be reproduced from a fresh clone today. One line in
-  `.gitattributes` fixes it; it is a repo-wide end-of-line policy, so it is not mine to set. If it is
-  added, add it to `tc` and `textcrush-ios` in the same session and re-verify these digests.
+  A `.gitattributes` does exist here, committed as `7c5ddd3`, but it carries one rule that is not this
+  one — `game/** linguist-vendored` — so the end-of-line policy is still unset. `core.autocrlf=true`
+  means a fresh clone or a plain `git checkout` materialises text files as CRLF, and the same commit
+  then builds to `8b3ae0d9…` instead of the published `b12ae94c…`: a functionally identical APK (same
+  version stamp, same code) whose only differences are the line endings of `Board.js` and of the
+  compiled manifest, with `git status` still reporting clean. So the digests in the README and in the
+  release notes cannot be reproduced from a fresh clone today. One line in `.gitattributes` fixes it;
+  it is a repo-wide end-of-line policy, so it is not mine to set, and it is not set. If it is added,
+  add it to `tc` and `textcrush-ios` in the same session and re-verify these digests.
 - **No CI in this repository.** A real job needs the Android SDK and an emulator; only the static half
   of `tools/check-version.sh` (that `build.sh` passes no `--version-*` flag) runs without them. Left
-  out deliberately rather than added as a job that verifies almost nothing.
+  out deliberately rather than added as a job that verifies almost nothing. Checked 2026-10-15: there
+  is no `.github` directory here at all, so this is still the case.
