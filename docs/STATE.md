@@ -35,10 +35,12 @@ stands.
 `8cb327a`: `tools/check-version.sh` and `tools/check-game.sh`, wired into `build.sh`, plus the
 README's account of where the version identity lives and how to check the vendored game.
 
-**2026-10-15: `docs/STATE.md` and the README's description of it, nothing else.** The push status was
-wrong in the direction that matters — it said nothing had been pushed when the branch had been pushed
-the day before — so it now carries the reflog line, the `ls-remote` answer and the release's own
-digest. Both checks were re-run and are still green; no build was run.
+**2026-10-15: `docs/STATE.md` and the README's description of it, nothing else.** Twice in one day:
+first the push record was wrong in the direction that matters — it said nothing had been pushed when the
+branch had been pushed the day before — so it now carries the reflog line, the `ls-remote` answer and
+the release's own digest; then Kevin's call ("push textcrush-android and textcrush-ios; keep tc held")
+was recorded, which makes this a commit-and-push repository and makes the 2026-10-14 push something he
+has now confirmed he wants. Both checks were re-run and are still green; no build was run.
 
 ## Next
 
@@ -52,15 +54,16 @@ digest. Both checks were re-run and are still green; no build was run.
    No re-vendoring is due: no commit in `tc` after `b8d04bc0` touches `source/` (`git -C ../tc diff
    --stat b8d04bc0..HEAD -- source/` is empty as of 2026-10-15), so the pin names an older commit
    but the copy is content-current.
-5. **Kevin: who authorised the 2026-10-14 push, and does the hold still cover this repository?**
-   See Push status. The signing-identity backup above needs no decision and should happen first.
+5. **Nothing here is waiting on a decision.** Kevin's call of 2026-10-15 makes this a commit-and-push
+   repository (see Push status), so each turn ends with the branch level with `origin/main`. The
+   signing-identity backup above needs no decision and should happen first.
 
-## Push status (exact, checked 2026-10-15)
+## Push status and Kevin's decision (2026-10-15)
 
-**One commit is unpushed, and it is this note.** `git log --oneline origin/main..HEAD` lists exactly
-the commit carrying this file, so the branch is 1 ahead. Everything before it is on the remote: with
-that commit set aside, `git status -sb` prints `## main...origin/main` with no `[ahead]` — the branch
-is 0 ahead / 0 behind the remote, not the 2 ahead this note claimed on 2026-10-14.
+**The branch is level with the remote: 0 ahead, 0 behind.** `git status -sb` prints
+`## main...origin/main` with no `[ahead]`, and the remote agrees — see the push record below. Not the
+2 ahead the 2026-10-14 note claimed: those two commits went out on 2026-10-14 13:52:15 -0700, and this
+note's own commit went out with this turn's push.
 
 **The push happened at 2026-10-14 13:52:15 -0700**, an hour and twenty-three minutes after the two
 commits were written and after the earlier version of this note said nothing had been pushed:
@@ -101,15 +104,36 @@ a repository that was already public. It did not touch `v1.9` (still Latest, pub
 approval at 2026-10-14T17:10:22Z, three hours before this push), did not create a tag, and published
 no new APK. The published asset's digest still equals the APK in this checkout to the byte.
 
-**Who authorised that push is not recorded in this repository, and that is Kevin's to answer.** The
-standing rule for these three is commit locally and stop. Nothing has been pushed since, so the only
-unpushed commit now is the one carrying this note.
+**Kevin's decision, received this turn, verbatim: "push textcrush-android and textcrush-ios; keep tc
+held."** This repository is a **commit-and-push** repository: each turn commits its work and pushes it,
+and ends level with `origin/main`. That is his standing instruction, not a question waiting on him — and
+it settles the 2026-10-14 push above too, which was this repository being used the way he now says he
+wants it used. `textcrush` (tc) is the exception, held locally because a push there deploys the live
+site.
 
-**What a push from here would publish, going forward:** the branch's commits and nothing else. Nothing
-in this repository reacts to a push, a tag moves only when it is pushed explicitly, and publishing a
-release is a separate act from pushing a branch.
+**This turn's push**, confirmed from the remote rather than from a local ref:
+
+```
+$ git push origin main
+   10117f0..c880869  main -> main
+
+$ git ls-remote origin refs/heads/main
+c88086922cd1b67cc1353a67d14e52e7c64f782d        refs/heads/main
+```
+
+`c88086922cd1b67cc1353a67d14e52e7c64f782d` was this branch's local head when it was pushed, so the
+branch came out 0 ahead / 0 behind. The commit carrying the note you are reading was pushed the same
+way, straight after it was written, so this file is on the remote too.
+
+**What this repository's pushes publish, and what they cannot publish:** the branch's commits and
+nothing else. No workflow reacts to a push — there is no `.github` directory — a tag moves only when it
+is pushed explicitly, and publishing a release is a separate act from pushing a branch. No push here has
+ever created an APK, and none can.
 
 ## Open decisions (Kevin's)
+
+Still his after the push call of 2026-10-15: that call was only about where the commits go, not about
+any of these.
 
 - **`.gitattributes` with `* text=auto eol=lf` — and this is the repository that needs it.**
   A `.gitattributes` does exist here, committed as `7c5ddd3`, but it carries one rule that is not this
